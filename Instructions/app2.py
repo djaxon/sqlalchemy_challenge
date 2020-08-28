@@ -72,13 +72,34 @@ def station_name():
 
     """Return a list of all preciptation between 8/23/17 and 8/23/16"""
 
-    # Show list of stations
+    # Create list of stations
 
     station_name=session.query(Station.station).all()
 
     session.close()
 
     return jsonify(station_name)
+
+@app2.route("/tobs")
+def LTM_temps():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all preciptation between 8/23/17 and 8/23/16"""
+
+    # Query dates and temps of the most active station for the last year
+    
+    temps = [Measurement.date, func.avg(Measurement.tobs).label('temp')]
+         
+    LTM_temps = session.query(*temps).\
+        filter(Measurement.date > '2016-08-09').\
+        filter(Measurement.station == 'USC00519281').\
+        group_by(Measurement.date).\
+        order_by(Measurement.date).all()
+
+    session.close()
+
+    return jsonify(LTM_temps)
 
 # @app2.route("/api/v1.0/Station")
 # def passengers():
